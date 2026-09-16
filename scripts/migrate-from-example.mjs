@@ -121,6 +121,9 @@ function rewriteHref(value, currentSlug) {
     return value;
   }
 
+  if (/signup\.minori\.co\.id/i.test(value)) {
+    return /register/i.test(value) ? "/register" : "/login";
+  }
   if (/^https?:\/\//i.test(value)) return value;
   if (value.startsWith("//")) return value;
   if (value.startsWith("/wp-content/") || value.startsWith("/wp-includes/")) return value;
