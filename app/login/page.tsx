@@ -1,14 +1,7 @@
-import { AuthCard } from "@/components/AuthCard";
+import { redirect } from "next/navigation";
+import { hanaAppUrl } from "@/lib/hana-app";
 
-export const metadata = {
-  title: "Login",
-};
-
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; info?: string }>;
-}) {
-  const { error, info } = await searchParams;
-  return <AuthCard mode="login" error={error} info={info} />;
+/** Login siswa dilakukan di aplikasi Raftel, bukan di landing. */
+export default function LoginPage() {
+  redirect(`${hanaAppUrl()}/`);
 }
