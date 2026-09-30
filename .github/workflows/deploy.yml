@@ -1,0 +1,22 @@
+name: Deploy Landing to Lab Server
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Pull, Build & Restart Landing Container
+        run: |
+          cd /opt/raftel/landing-page-Hana
+          git pull origin dev
+
+          cd /opt/raftel
+          docker compose build --no-cache landing
+          docker compose up -d landing
+          docker compose restart proxy
