@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
+import { Header } from "@/components/site/Header";
+import { Footer } from "@/components/site/Footer";
+import { site } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Beranda - minori.co.id",
-  description:
-    "SO (Sending Organization) Magang Jepang dan P3MI Tokuteiginou (SSW) Kerja di Jepang",
+  title: {
+    default: site.name,
+    template: `%s · ${site.shortName}`,
+  },
+  description: site.description,
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -14,7 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body>
+        <div className="site-shell">
+          <Header />
+          <main className="site-main">{children}</main>
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }
