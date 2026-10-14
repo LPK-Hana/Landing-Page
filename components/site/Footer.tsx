@@ -48,9 +48,26 @@ export function Footer() {
             <p className="site-footer__values">{site.values.join(" · ")}</p>
           </div>
         </div>
+
+        <div className="site-footer__map">
+          <div>
+            <h3>Lokasi</h3>
+            <p>{site.maps.name}</p>
+            <a href={site.maps.url} target="_blank" rel="noopener noreferrer">
+              Buka di Google Maps
+            </a>
+          </div>
+          <iframe
+            title={`Peta ${site.maps.name}`}
+            src={`https://maps.google.com/maps?q=${site.maps.lat},${site.maps.lng}&z=16&hl=id&output=embed`}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       </div>
       <div className="site-footer__bar">
         <p>© {new Date().getFullYear()} {site.shortName}. All rights reserved.</p>
+        <a href={site.cta.masuk()}>Portal Siswa</a>
       </div>
     </footer>
   );

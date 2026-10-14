@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
+import { DeparturePopup } from "@/components/site/DeparturePopup";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -27,6 +29,8 @@ export default function RootLayout({
           <Header />
           <main className="site-main">{children}</main>
           <Footer />
+          <WhatsAppFloat />
+          <DeparturePopup />
         </div>
       </body>
     </html>

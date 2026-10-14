@@ -46,7 +46,7 @@ export function Header() {
             </Link>
           ))}
           <a href={site.cta.masuk()} className="site-header__cta site-header__cta--ghost">
-            Masuk
+            Login Siswa
           </a>
           <a href={site.cta.daftar()} className="site-header__cta">
             Daftar
