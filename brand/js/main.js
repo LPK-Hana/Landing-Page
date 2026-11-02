@@ -41,6 +41,7 @@ export function install(S) {
       S.language();
       S.chromeLabels();
       S.placeDaftar();
+      S.centerMobileHero();
       S.footerBrand();
       var facGrid = document.querySelector(".hana-facility-grid");
       if (facGrid && S.isHomePage()) S.centerFacilities(facGrid);
@@ -103,6 +104,7 @@ install(S);
     S.fitOpenMenu();
     S.fitHeroWords(true);
     S.placeDaftar();
+    S.centerMobileHero();
     S.scatter();
     var arcs = document.querySelectorAll(".hana-arc-stage");
     for (var i = 0; i < arcs.length; i++) S.placeArc(arcs[i]);

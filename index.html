@@ -382,8 +382,7 @@
 
   function level(t) {
     if (t < 0.8) return 1 - Math.pow(1 - t / 0.8, 3);
-    if (t < 0.9) return 1 - ((t - 0.8) / 0.1) * 0.035;
-    return 0.965 + Math.min(1, (t - 0.9) / 0.1) * 0.035;
+    return 1;
   }
 
   function tryLeave() {
@@ -396,13 +395,11 @@
   function frame(now) {
     var t = Math.min(1, (now - root._t0) / duration);
     var pct = (level(t) * 100).toFixed(2) + "%";
-    var shown = Math.round(level(t) * 100) + "%";
+    var shownNum = Math.round(level(t) * 100);
+    if (root._hanaPctNum == null || shownNum >= root._hanaPctNum) root._hanaPctNum = shownNum;
     water.style.height = pct;
     surface.style.bottom = pct;
-    if (root._hanaPct !== shown) {
-      root._hanaPct = shown;
-      if (pctNode) pctNode.textContent = shown;
-    }
+    if (pctNode && pctNode.textContent !== root._hanaPctNum + "%") pctNode.textContent = root._hanaPctNum + "%";
     surface.style.opacity = t > 0.94 ? String(Math.max(0, 1 - (t - 0.94) / 0.06)) : "1";
     if (t < 1) {
       requestAnimationFrame(frame);
