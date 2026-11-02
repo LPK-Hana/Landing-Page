@@ -145,7 +145,7 @@ export function install(S) {
         node.addEventListener("click", function () {
           window.setTimeout(function () {
             var marks = document.querySelectorAll(".framer-1qc1yuk .hana-wordmark");
-            for (var m = 0; m < marks.length; m++) S.playWordAnim(marks[m]);
+            for (var m = 0; m < marks.length; m++) S.finishHero(marks[m]);
           }, 80);
         }, true);
       }
@@ -736,6 +736,7 @@ export function install(S) {
 
   S.openContact = function openContact() {
     if (S.herePath() === "/contact") return;
+    document.documentElement.classList.add("hana-contact-page");
     var onHome = (history.state && history.state.routeId === "augiA20Il") || !!document.querySelector(".framer-o75jI");
     if (onHome) {
       history.pushState(history.state, "", "/contact");

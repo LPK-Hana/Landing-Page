@@ -45,6 +45,13 @@ export function install(S) {
     S.placeDaftar();
   }
 
+  S.finishHero = function finishHero(label) {
+    S.settleWord(label);
+    var rings = label.querySelector(".hana-rings");
+    if (rings) rings.classList.add("is-settled", "is-gone");
+    label.dataset.scatterOff = "1";
+  }
+
   S.finishWordColor = function finishWordColor(label, state) {
     label.classList.remove("is-rolling");
     label.dataset.intro = "";
@@ -408,11 +415,11 @@ export function install(S) {
       S.fitHeroWord(label, box, false);
       if (label.dataset.intro === "1") {
         /* sequence already running */
-      } else if (created && S.revealed) S.playWordAnim(label);
+      } else if (created && S.revealed) S.finishHero(label);
       else if (!created && S.revealed && label.dataset.colored === "1") {
         label.classList.add("is-show", "is-colored");
       } else if (!created && S.revealed && !label.classList.contains("is-show")) {
-        S.playWordAnim(label);
+        S.finishHero(label);
       }
     }
   }
@@ -500,13 +507,21 @@ export function install(S) {
     var ready = !!(word && (word.dataset.colored === "1" || word.classList.contains("is-colored")));
     wrap.classList.toggle("is-ready", ready);
     var pin = scroll.closest ? scroll.closest(".framer-20j0dp") : null;
-    if (pin && (window.scrollY || 0) < 2 && !pin.dataset.hanaPinTop) {
-      var pinTop = pin.style.top || getComputedStyle(pin).top;
-      if (pinTop && pinTop !== "auto") pin.dataset.hanaPinTop = pinTop;
-    }
-    if (pin && pin.dataset.hanaPinTop) {
-      pin.style.setProperty("top", pin.dataset.hanaPinTop, "important");
+    var mobileCue = (window.innerWidth || 1200) <= 809.98;
+    if (pin && mobileCue) {
+      pin.style.setProperty("top", "auto", "important");
+      pin.style.setProperty("bottom", "120px", "important");
       pin.style.setProperty("transform", "none", "important");
+    } else if (pin) {
+      pin.style.removeProperty("bottom");
+      if ((window.scrollY || 0) < 2 && !pin.dataset.hanaPinTop) {
+        var pinTop = pin.style.top && pin.style.top !== "auto" ? pin.style.top : getComputedStyle(pin).top;
+        if (pinTop && pinTop !== "auto") pin.dataset.hanaPinTop = pinTop;
+      }
+      if (pin.dataset.hanaPinTop) {
+        pin.style.setProperty("top", pin.dataset.hanaPinTop, "important");
+        pin.style.setProperty("transform", "none", "important");
+      }
     }
     var atTop = (window.scrollY || 0) < 2;
     if (atTop || !wrap.dataset.restTop) {
@@ -523,47 +538,25 @@ export function install(S) {
     } else if (wrap.style.top !== wrap.dataset.restTop + "px") {
       wrap.style.top = wrap.dataset.restTop + "px";
     }
-    var boxRect = box.getBoundingClientRect();
 
     var floatBtn = document.querySelector(".hana-float-daftar");
-    var dock = boxRect.bottom < 80 || window.scrollY > Math.max(120, boxRect.height * 0.35);
-    wrap.classList.toggle("is-docked", dock);
-    if (floatBtn) floatBtn.classList.toggle("is-on", dock && ready);
+    wrap.classList.remove("is-docked");
+    if (floatBtn) floatBtn.classList.remove("is-on");
   }
 
   S.scatter = function scatter() {
-    var kv = document.querySelector(".framer-t022jh") || document.querySelector("#kv");
-    var label = kv && kv.querySelector(".hana-wordmark");
-    if (!kv || !label || label.dataset.intro === "1") return;
-    var rect = kv.getBoundingClientRect();
-    var total = Math.max(rect.height * 0.85, 1);
-    var scrolled = Math.min(Math.max(-rect.top, 0), total);
-    var p = scrolled / total;
-    var ease = p * p * (3 - 2 * p);
-    var rings = label.querySelector(".hana-rings");
-    if (rings && label.classList.contains("is-show") && !rings.classList.contains("is-gone")) {
-      rings.classList.add("is-gone");
-    }
-    var key = ease.toFixed(3);
-    if (label._scatterKey === key) return;
-    label._scatterKey = key;
-    var parts = label.querySelectorAll(".hana-wordmark-base .hana-letter");
-    var colorParts = label.querySelectorAll(".hana-wordmark-color .hana-letter");
-    for (var i = 0; i < parts.length; i++) {
-      var idx = parseInt(parts[i].getAttribute("data-i") || String(i), 10);
-      var mid = (parts.length - 1) / 2;
-      var fromCenter = idx - mid;
-      var lift = ease * (140 + Math.abs(fromCenter) * 28 + (idx % 3) * 36);
-      var drift = ease * fromCenter * 18;
-      var rot = ease * fromCenter * 4;
-      var fade = 1 - ease * 0.15;
-      var tf = "translate(" + drift.toFixed(1) + "px," + (-lift).toFixed(1) + "px) rotate(" + rot.toFixed(2) + "deg)";
-      parts[i].style.transform = tf;
-      parts[i].style.opacity = String(fade);
-      if (colorParts[i]) {
-        colorParts[i].style.transform = tf;
-        colorParts[i].style.opacity = String(fade);
+    var labels = document.querySelectorAll(".framer-1qc1yuk .hana-wordmark");
+    for (var n = 0; n < labels.length; n++) {
+      var label = labels[n];
+      if (label.dataset.intro === "1" || label.dataset.scatterOff === "1") continue;
+      var parts = label.querySelectorAll(".hana-letter");
+      for (var i = 0; i < parts.length; i++) {
+        parts[i].style.transform = "";
+        parts[i].style.opacity = "";
       }
+      var rings = label.querySelector(".hana-rings");
+      if (rings && label.classList.contains("is-show")) rings.classList.add("is-gone");
+      label.dataset.scatterOff = "1";
     }
   }
 
@@ -571,7 +564,7 @@ export function install(S) {
     var marks = document.querySelectorAll(".framer-1qc1yuk .hana-wordmark");
     if (S.revealed) {
       for (var e = 0; e < marks.length; e++) {
-        if (!marks[e].classList.contains("is-show") && marks[e].dataset.intro !== "1") S.playWordAnim(marks[e]);
+        if (!marks[e].classList.contains("is-colored") && marks[e].dataset.intro !== "1") S.finishHero(marks[e]);
       }
       return;
     }
