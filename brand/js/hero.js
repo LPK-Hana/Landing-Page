@@ -352,6 +352,39 @@ export function install(S) {
     }
   }
 
+  S.centerMobileHero = function centerMobileHero() {
+    var mobile = (window.innerWidth || 1200) <= 809.98;
+    var heroes = document.querySelectorAll(".framer-t022jh, #kv");
+    for (var i = 0; i < heroes.length; i++) {
+      var kv = heroes[i];
+      var word = kv.querySelector(".hana-wordmark");
+      var stack = word;
+      while (stack && stack.parentElement !== kv) stack = stack.parentElement;
+      if (!stack) continue;
+      if (!mobile || kv.getBoundingClientRect().height < 200 || word.getBoundingClientRect().height < 24) {
+        if (stack.dataset.hanaShift) {
+          stack.style.transform = "";
+          delete stack.dataset.hanaShift;
+        }
+        continue;
+      }
+      var prev = parseFloat(stack.dataset.hanaShift || "0") || 0;
+      var rect = word.getBoundingClientRect();
+      var extra = Math.round((rect.top + rect.bottom) / 2 - window.innerHeight / 2);
+      if (Math.abs(extra) < 2) continue;
+      var next = prev + extra;
+      var header = document.querySelector(".framer-16g0gst-container");
+      var limit = header ? header.getBoundingClientRect().bottom + 12 : 72;
+      var room = stack.getBoundingClientRect().top - limit;
+      if (extra > room) next = prev + room;
+      if (next < 0) next = 0;
+      next = Math.round(next);
+      if (next === prev) continue;
+      stack.dataset.hanaShift = String(next);
+      stack.style.transform = next ? "translateY(" + (-next) + "px)" : "";
+    }
+  }
+
   S.word = function word() {
     var boxes = S.heroBoxes();
     for (var i = 0; i < boxes.length; i++) {

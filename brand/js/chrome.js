@@ -329,32 +329,41 @@ export function install(S) {
     }
   }
 
+  S.markSiteMenu = function markSiteMenu() {
+    var here = S.herePath();
+    var links = document.querySelectorAll(".hana-menu a");
+    for (var i = 0; i < links.length; i++) {
+      var dest = (links[i].getAttribute("href") || "").split("#")[0].split("?")[0].replace(/\/+$/, "") || "/";
+      var on = dest === here;
+      links[i].classList.toggle("is-on", on);
+      if (on) links[i].setAttribute("aria-current", "page");
+      else links[i].removeAttribute("aria-current");
+    }
+  }
+
   S.ensureSiteMenu = function ensureSiteMenu() {
     var menu = document.querySelector(".framer-GFbLs");
     if (!menu) return;
     var host = menu.querySelector(".framer-19smlq2");
-    if (!host || host.querySelector(".hana-menu")) return;
-    var nav = document.createElement("nav");
-    nav.className = "hana-menu";
-    nav.innerHTML =
-      '<a href="/">' + S.tx("Beranda", "ホーム") + '</a>' +
-      '<a href="/program">' + S.tx("Program", "プログラム") + '</a>' +
-      '<a href="/contact">' + S.tx("Contact Us", "お問い合わせ") + '</a>';
-    var here = (location.pathname || "").replace(/\/+$/, "") || "/";
-    var marks = nav.querySelectorAll("a");
-    for (var m = 0; m < marks.length; m++) {
-      var dest = marks[m].getAttribute("href");
-      if ((dest === "/" && here === "/") || (dest === "/program" && here === "/program") || (dest === "/contact" && here === "/contact")) marks[m].classList.add("is-on");
+    if (!host) return;
+    if (!host.querySelector(".hana-menu")) {
+      var nav = document.createElement("nav");
+      nav.className = "hana-menu";
+      nav.innerHTML =
+        '<a href="/">' + S.tx("Beranda", "ホーム") + '</a>' +
+        '<a href="/program">' + S.tx("Program", "プログラム") + '</a>' +
+        '<a href="/contact">' + S.tx("Contact Us", "お問い合わせ") + '</a>';
+      nav.addEventListener("click", function (event) {
+        var link = event.target && event.target.closest ? event.target.closest("a") : null;
+        if (!link) return;
+        event.preventDefault();
+        event.stopPropagation();
+        document.documentElement.classList.add("hana-menu-force-shut");
+        S.visit(link.getAttribute("href") || "/");
+      });
+      host.appendChild(nav);
     }
-    nav.addEventListener("click", function (event) {
-      var link = event.target && event.target.closest ? event.target.closest("a") : null;
-      if (!link) return;
-      event.preventDefault();
-      event.stopPropagation();
-      document.documentElement.classList.add("hana-menu-force-shut");
-      S.visit(link.getAttribute("href") || "/");
-    });
-    host.appendChild(nav);
+    S.markSiteMenu();
   }
 
   S.stackFooterBrand = function stackFooterBrand() {
@@ -722,6 +731,7 @@ export function install(S) {
     }
     var anchor = S.framerAnchor(page.path);
     if (!anchor || !S.invokeFramer(anchor)) window.location.assign(page.path + page.hash);
+    else S.markSiteMenu();
   }
 
   S.openContact = function openContact() {
