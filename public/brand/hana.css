@@ -335,8 +335,20 @@
     }
   }
 
-  html.hana-contact-page .framer-o75jI > :not(.hana-contact):not(:has(.framer-5PlRZ)) {
+  html.hana-contact-page #main {
+    visibility: hidden;
+  }
+  html.hana-contact-page #main:has(.hana-contact) {
+    visibility: visible;
+  }
+  html.hana-contact-page .framer-o75jI > :not(.hana-contact) {
     display: none !important;
+  }
+  html.hana-contact-page .framer-o75jI:has(> .hana-contact) > .framer-lzdiit-container {
+    display: block !important;
+  }
+  [data-framer-name="footer"] > :not(.hana-wordmark) {
+    visibility: hidden !important;
   }
   .hana-contact {
     position: relative;
