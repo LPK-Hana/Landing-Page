@@ -577,12 +577,14 @@
     pointer-events: none !important;
   }
   .framer-1qc1yuk > :not(.hana-wordmark) { visibility: hidden !important; }
-  .framer-1qc1yuk {
+  .framer-t022jh .framer-1qc1yuk,
+  #kv .framer-1qc1yuk {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
     overflow: visible !important;
+    transform: none !important;
   }
 
   .hana-wordmark {
