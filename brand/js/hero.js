@@ -361,13 +361,14 @@ export function install(S) {
       var stack = word;
       while (stack && stack.parentElement !== kv) stack = stack.parentElement;
       if (!stack) continue;
-      if (!mobile || kv.getBoundingClientRect().height < 200 || word.getBoundingClientRect().height < 24) {
-        if (stack.dataset.hanaShift) {
+      if (!mobile || kv.getBoundingClientRect().height < 200 || word.getBoundingClientRect().height < 24 || word.dataset.intro === "1") {
+        if (!mobile && stack.dataset.hanaShift) {
           stack.style.transform = "";
           delete stack.dataset.hanaShift;
         }
         continue;
       }
+      if ((window.scrollY || 0) > 1) continue;
       var prev = parseFloat(stack.dataset.hanaShift || "0") || 0;
       var rect = word.getBoundingClientRect();
       var extra = Math.round((rect.top + rect.bottom) / 2 - window.innerHeight / 2);
@@ -498,15 +499,31 @@ export function install(S) {
     var word = box.querySelector(".hana-wordmark");
     var ready = !!(word && (word.dataset.colored === "1" || word.classList.contains("is-colored")));
     wrap.classList.toggle("is-ready", ready);
-    var boxRect = box.getBoundingClientRect();
-    var scrollRect = scroll.getBoundingClientRect();
-    var hostRect = host.getBoundingClientRect();
-    var mid = (boxRect.bottom + scrollRect.top) / 2 - hostRect.top;
-    var topPx = Math.round(Math.max(boxRect.bottom - hostRect.top + 18, mid - 12));
-    if (wrap._hanaTop !== topPx) {
-      wrap._hanaTop = topPx;
-      wrap.style.top = topPx + "px";
+    var pin = scroll.closest ? scroll.closest(".framer-20j0dp") : null;
+    if (pin && (window.scrollY || 0) < 2 && !pin.dataset.hanaPinTop) {
+      var pinTop = pin.style.top || getComputedStyle(pin).top;
+      if (pinTop && pinTop !== "auto") pin.dataset.hanaPinTop = pinTop;
     }
+    if (pin && pin.dataset.hanaPinTop) {
+      pin.style.setProperty("top", pin.dataset.hanaPinTop, "important");
+      pin.style.setProperty("transform", "none", "important");
+    }
+    var atTop = (window.scrollY || 0) < 2;
+    if (atTop || !wrap.dataset.restTop) {
+      var boxRect = box.getBoundingClientRect();
+      var scrollRect = scroll.getBoundingClientRect();
+      var hostRect = host.getBoundingClientRect();
+      var mid = (boxRect.bottom + scrollRect.top) / 2 - hostRect.top;
+      var topPx = Math.round(Math.max(boxRect.bottom - hostRect.top + 18, mid - 12));
+      wrap.dataset.restTop = String(topPx);
+      if (wrap._hanaTop !== topPx) {
+        wrap._hanaTop = topPx;
+        wrap.style.top = topPx + "px";
+      }
+    } else if (wrap.style.top !== wrap.dataset.restTop + "px") {
+      wrap.style.top = wrap.dataset.restTop + "px";
+    }
+    var boxRect = box.getBoundingClientRect();
 
     var floatBtn = document.querySelector(".hana-float-daftar");
     var dock = boxRect.bottom < 80 || window.scrollY > Math.max(120, boxRect.height * 0.35);
@@ -527,7 +544,7 @@ export function install(S) {
     if (rings && label.classList.contains("is-show") && !rings.classList.contains("is-gone")) {
       rings.classList.add("is-gone");
     }
-    var key = Math.round(ease * 48);
+    var key = ease.toFixed(3);
     if (label._scatterKey === key) return;
     label._scatterKey = key;
     var parts = label.querySelectorAll(".hana-wordmark-base .hana-letter");
