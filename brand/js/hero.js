@@ -309,46 +309,33 @@ export function install(S) {
     }
   }
 
-  S.fitHeroWord = function fitHeroWord(label, box, force) {
-    if (!force && label.dataset.intro === "1") return;
+  S.fitHeroWord = function fitHeroWord(label, box) {
     var width = box.offsetWidth;
     var height = box.offsetHeight;
     if (width < 80 || height < 48) return;
     var vw = window.innerWidth || width;
     var bucket = String(Math.round(vw / 32));
+    var view = window.visualViewport;
+    var calm = !view || (Math.abs(view.scale - 1) < 0.02 && Math.abs(view.offsetTop) < 2);
+    if (label.dataset.sizeLock && label.dataset.sizeBucket === bucket && (label.dataset.fontFit === "1" || !calm)) {
+      label.style.fontSize = label.dataset.sizeLock + "px";
+      return;
+    }
     var healthy = width >= Math.min(vw, 1680) * 0.62;
+    if (!healthy && label.dataset.sizeLock) {
+      label.style.fontSize = label.dataset.sizeLock + "px";
+      return;
+    }
     var size = height * 1.28;
     label.style.fontSize = size + "px";
-    var guard = 0;
-    while (label.scrollWidth > width * 1.02 && size > 36 && guard < 18) {
-      size *= (width * 1.02) / Math.max(label.scrollWidth, 1);
-      label.style.fontSize = Math.floor(size) + "px";
-      guard++;
-    }
+    var textWidth = label.scrollWidth;
+    if (textWidth > width * 1.02) size = Math.max(36, size * (width * 1.02) / textWidth);
     size = Math.floor(size);
-    if (!healthy) {
-      if (S.wordLock[bucket]) label.style.fontSize = S.wordLock[bucket] + "px";
-      return;
-    }
-    if (!force && S.wordLock[bucket] && size < S.wordLock[bucket] - 2) {
-      label.style.fontSize = S.wordLock[bucket] + "px";
-      return;
-    }
-    S.wordLock[bucket] = size;
     label.style.fontSize = size + "px";
-    if (label.dataset.intro !== "1" && label.querySelector(".hana-rings")) {
-      var rounded = String(size);
-      if (label.dataset.ringSize && label.dataset.ringSize !== rounded) {
-        var shown = label.classList.contains("is-show");
-        S.buildRings(label);
-        var ringHost = label.querySelector(".hana-rings");
-        if (shown && ringHost) {
-          ringHost.classList.add("is-settled", "is-gone");
-          var rings = ringHost.children;
-          for (var r = 0; r < rings.length; r++) rings[r].classList.add("is-on");
-        }
-      }
-    }
+    label.dataset.sizeLock = String(size);
+    label.dataset.sizeBucket = bucket;
+    var fontsReady = !document.fonts || document.fonts.status === "loaded";
+    if (calm && fontsReady) label.dataset.fontFit = "1";
   }
 
   S.fitHeroWords = function fitHeroWords(force) {
@@ -369,17 +356,28 @@ export function install(S) {
       while (stack && stack.parentElement !== kv) stack = stack.parentElement;
       if (!stack) continue;
       if (!mobile || kv.getBoundingClientRect().height < 200 || word.getBoundingClientRect().height < 24 || word.dataset.intro === "1") {
-        if (!mobile && stack.dataset.hanaShift) {
+        if (!mobile) {
           stack.style.transform = "";
+          stack.style.top = "";
           delete stack.dataset.hanaShift;
+          delete stack.dataset.hanaShiftW;
         }
         continue;
       }
       if ((window.scrollY || 0) > 1) continue;
+      var widthKey = String(window.innerWidth || 0);
+      if (stack.dataset.hanaShift && stack.dataset.hanaShiftW === widthKey) {
+        stack.style.transform = "none";
+        stack.style.top = (-parseFloat(stack.dataset.hanaShift)) + "px";
+        continue;
+      }
       var prev = parseFloat(stack.dataset.hanaShift || "0") || 0;
       var rect = word.getBoundingClientRect();
       var extra = Math.round((rect.top + rect.bottom) / 2 - window.innerHeight / 2);
-      if (Math.abs(extra) < 2) continue;
+      if (Math.abs(extra) < 2 && stack.dataset.hanaShift) {
+        stack.dataset.hanaShiftW = widthKey;
+        continue;
+      }
       var next = prev + extra;
       var header = document.querySelector(".framer-16g0gst-container");
       var limit = header ? header.getBoundingClientRect().bottom + 12 : 72;
@@ -387,9 +385,11 @@ export function install(S) {
       if (extra > room) next = prev + room;
       if (next < 0) next = 0;
       next = Math.round(next);
-      if (next === prev) continue;
       stack.dataset.hanaShift = String(next);
-      stack.style.transform = next ? "translateY(" + (-next) + "px)" : "";
+      stack.dataset.hanaShiftW = widthKey;
+      if (getComputedStyle(stack).position === "static") stack.style.position = "relative";
+      stack.style.transform = "none";
+      stack.style.top = next ? (-next) + "px" : "";
     }
   }
 
