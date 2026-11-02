@@ -627,6 +627,10 @@
     transform: translateY(0);
     transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1), transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .hana-wordmark.is-colored .hana-type {
+    transform: none;
+    transition: none;
+  }
   .hana-rings {
     position: absolute;
     inset: 0;
@@ -674,7 +678,6 @@
   .hana-wordmark .hana-karya { color: #DF1A22; }
   .hana-letter {
     display: inline-block;
-    will-change: transform, opacity;
   }
   .hana-wordmark-color .hana-letter {
     transition: clip-path 0.72s cubic-bezier(0.22, 1, 0.36, 1);

@@ -102,7 +102,7 @@ install(S);
     S.title();
     S.ensureFlag();
     S.fitOpenMenu();
-    S.fitHeroWords(true);
+    S.fitHeroWords(false);
     S.placeDaftar();
     S.centerMobileHero();
     S.scatter();
